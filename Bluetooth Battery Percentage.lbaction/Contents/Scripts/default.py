@@ -1,4 +1,4 @@
-#!/usr/local/opt/python/libexec/bin/python
+#!/usr/bin/env python
 #
 # LaunchBar Action Script
 #
