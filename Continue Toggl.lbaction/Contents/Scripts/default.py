@@ -23,7 +23,7 @@ def find_last_not_break(history_time_entries: list):
         return find_last_not_break(history_time_entries[:-1])
 
 
-last_entry = find_last_not_break(my_entries)
+last_entry: dict = find_last_not_break(my_entries)
 
 # %%
 # chech if now have tasks running.
@@ -32,8 +32,10 @@ if last_entry['duration'] < 0:
     notifi_content = '⚠Now Having Running Task: ' + last_entry['description']
 else:
     try:
+        pid = last_entry.get('pid', None)
+        tid = last_entry.get('tid', None)
         started_entry = toggl.startTimeEntry(
-            description=last_entry['description'], pid=last_entry['pid'])
+            description=last_entry['description'], pid=pid, tid=tid)
         # notifi_title = 'Continue Toggl Success!'
         notifi_content = '✅Continue Last Entry: ' + started_entry['data'][
             'description']
