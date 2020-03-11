@@ -13,8 +13,19 @@ toggl.setAuthCredentials('<EMAIL>', '<PASSWORD>')
 
 # %%
 my_entries = toggl.request('https://www.toggl.com/api/v8/time_entries')
-last_entry = my_entries[-1]
 
+
+def find_last_not_break(history_time_entries: list):
+    last_entry = history_time_entries[-1]
+    if last_entry['description'] != 'Pomodoro Break':
+        return last_entry
+    else:
+        return find_last_not_break(history_time_entries[:-1])
+
+
+last_entry = find_last_not_break(my_entries)
+
+# %%
 # chech if now have tasks running.
 if last_entry['duration'] < 0:
     # notifi_title = 'Having Running'
