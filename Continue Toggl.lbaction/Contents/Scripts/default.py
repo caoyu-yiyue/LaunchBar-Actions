@@ -15,27 +15,31 @@ toggl.setAuthCredentials('<EMAIL>', '<PASSWORD>')
 my_entries = toggl.request('https://www.toggl.com/api/v8/time_entries')
 
 for time_entry in my_entries[::-1]:
-    if time_entry['description'] != 'Pomodoro Break':
+    description = time_entry.get('description', None)
+    if description != 'Pomodoro Break':
         last_entry = time_entry
         break
     else:
         continue
 
-
 # %%
 # chech if now have tasks running.
 if last_entry['duration'] < 0:
     # notifi_title = 'Having Running'
-    notifi_content = '⚠Now Having Running Task: ' + last_entry['description']
+    notifi_content = '⚠Now Having Running Task: ' + last_entry.get(
+        'description', 'No Description')
 else:
     try:
+        description = last_entry.get('description', None)
         pid = last_entry.get('pid', None)
         tid = last_entry.get('tid', None)
-        started_entry = toggl.startTimeEntry(
-            description=last_entry['description'], pid=pid, tid=tid)
+
+        started_entry = toggl.startTimeEntry(description=description,
+                                             pid=pid,
+                                             tid=tid)
         # notifi_title = 'Continue Toggl Success!'
-        notifi_content = '✅Continue Last Entry: ' + started_entry['data'][
-            'description']
+        notifi_content = '✅Continue Last Entry: ' + started_entry['data'].get(
+            'description', 'No Description')
     except HTTPError as e:
         # notifi_title = 'Continue Toggl Failed'
         notifi_content = '❌' + e.message
