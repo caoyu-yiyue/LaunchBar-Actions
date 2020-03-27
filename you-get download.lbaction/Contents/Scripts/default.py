@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/local/opt/python/libexec/bin/python
 #
 # LaunchBar Action Script
 #
@@ -22,16 +22,16 @@ DOWNLOAD_COMMAND = ['you-get', 'url', '--no-caption', '-o', DOWNLOAD_PATH]
 def download_video(url):
     DOWNLOAD_COMMAND[1] = url
     sp.run(DOWNLOAD_COMMAND)
-    av_num_match = re.search(r'av\d+', url, re.IGNORECASE)
-    if av_num_match:
-        av_num = av_num_match.group(0)
+    abv_num_match = re.search(r'(a|b)v[0-9a-zA-Z]+', url, re.IGNORECASE)
+    if abv_num_match:
+        abv_num = abv_num_match.group(0)
 
-        # 对刚下载的视频名前加上av 号
+        # 对刚下载的视频名前加上av/bv 号
         file_in_download = glob.glob(DOWNLOAD_PATH + '/*')
         last_video = max(file_in_download, key=os.path.getctime)
         video_title = os.path.basename(last_video)
         os.rename(last_video,
-                  DOWNLOAD_PATH + '/{} '.format(av_num) + video_title)
+                  DOWNLOAD_PATH + '/{} '.format(abv_num) + video_title)
 
 
 for one_arg in input_args:
@@ -40,16 +40,19 @@ for one_arg in input_args:
         # 进入通知的字符串
         notifi_content = '下载了一个视频：\n{}'.format(one_arg)
     else:
-        # 在每个参数中寻找av 值，并将其全部小写
-        avs = set(re.findall(r'av\d+', string=one_arg, flags=re.IGNORECASE))
-        download_urls = [
-            'https://www.bilibili.com/video/' + av.lower() for av in avs
+        # 在每个参数中寻找av/bv 值，如果是av 号则将其全部小写
+        abvs = set(
+            re.findall(r'(?:a|b)v[0-9a-zA-Z]+',
+                       string=one_arg,
+                       flags=re.IGNORECASE))
+        abvs_list = [
+            abv.lower() if abv.startswith(('a', 'A')) else abv for abv in abvs
         ]
-        for url in download_urls:
-            download_video(url=url)
+        for abv in abvs_list:
+            download_video(url='https://www.bilibili.com/video/' + abv)
 
-        avs_str = '\n'.join(avs)
-        notifi_content = '下载了 {} 个B 站视频：\n{}'.format(len(avs), avs_str)
+        avs_str = '\n'.join(abvs)
+        notifi_content = '下载了 {} 个B 站视频：\n{}'.format(len(abvs), avs_str)
 
 os.system("""
     osascript -e 'display notification "{}" with title "Dowanload Complete!"'
