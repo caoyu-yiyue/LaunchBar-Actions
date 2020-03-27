@@ -1,4 +1,4 @@
-#!/usr/local/opt/python/libexec/bin/python
+#!/usr/bin/env python
 #
 # LaunchBar Action Script
 #
@@ -18,24 +18,29 @@ DOWNLOAD_PATH = os.path.expanduser('~/Downloads')
 
 DOWNLOAD_COMMAND = ['you-get', 'url', '--no-caption', '-o', DOWNLOAD_PATH]
 DOWNLOAD_ITEMS = []
+FAILED_ITEMS = []
 
 
 def download_video(url):
     DOWNLOAD_COMMAND[1] = url
-    sp.run(DOWNLOAD_COMMAND, check=True)
     abv_num_match = re.search(r'(a|b)v[0-9a-zA-Z]+', url, re.IGNORECASE)
-    if abv_num_match:
-        abv_num = abv_num_match.group(0)
-        # 对刚下载的视频名前加上av/bv 号
-        file_in_download = glob.glob(DOWNLOAD_PATH + '/*')
-        last_video = max(file_in_download, key=os.path.getctime)
-        video_title = os.path.basename(last_video)
-        os.rename(last_video,
-                  DOWNLOAD_PATH + '/{} '.format(abv_num) + video_title)
-        # 将av/bv 号加入到下载过的项目里
-        DOWNLOAD_ITEMS.append(abv_num)
-    else:
-        DOWNLOAD_ITEMS.append(url)
+    try:
+        sp.run(DOWNLOAD_COMMAND, check=True)
+        if abv_num_match:
+            abv_num = abv_num_match.group(0)
+            # 对刚下载的视频名前加上av/bv 号
+            file_in_download = glob.glob(DOWNLOAD_PATH + '/*')
+            last_video = max(file_in_download, key=os.path.getctime)
+            video_title = os.path.basename(last_video)
+            os.rename(last_video,
+                      DOWNLOAD_PATH + '/{} '.format(abv_num) + video_title)
+            # 将av/bv 号加入到下载过的项目里
+            DOWNLOAD_ITEMS.append(abv_num)
+        else:
+            DOWNLOAD_ITEMS.append(url)
+    except sp.CalledProcessError:
+        # 如果you-get CLI 出现错误则增加识别到FAILED_ITEMS 中
+        FAILED_ITEMS.append(abv_num_match.group(0) if abv_num_match else url)
 
 
 for one_arg in input_args:
@@ -54,8 +59,11 @@ for one_arg in input_args:
             download_video(url='https://www.bilibili.com/video/' + abv)
 
 downloaded_items_str = '\n'.join(DOWNLOAD_ITEMS)
-notifi_content = '下载了 {} 个视频：\n{}'.format(len(DOWNLOAD_ITEMS),
-                                          downloaded_items_str)
+notifi_content = '成功下载了 {} 个视频：\n{}'.format(len(DOWNLOAD_ITEMS),
+                                            downloaded_items_str)
+if len(FAILED_ITEMS) > 0:
+    notifi_content += '\n{}个视频下载失败：\n{}'.format(len(FAILED_ITEMS),
+                                                '\n'.join(FAILED_ITEMS))
 
 os.system("""
     osascript -e 'display notification "{}" with title "Dowanload Complete!"'
