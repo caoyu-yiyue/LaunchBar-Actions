@@ -26,7 +26,7 @@ for time_entry in my_entries[::-1]:
 # chech if now have tasks running.
 if last_entry['duration'] < 0:
     # notifi_title = 'Having Running'
-    notifi_content = '⚠Now Having Running Task: ' + last_entry.get(
+    notifi_content = '⚠Now Have Running Task: ' + last_entry.get(
         'description', 'No Description')
 else:
     try:
