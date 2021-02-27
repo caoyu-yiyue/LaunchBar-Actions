@@ -2,7 +2,10 @@
 #
 # LaunchBar Action Script
 #
-"""LaunchBar Action Script for changing Wechat Pay csv to MoneyWiz style."""
+"""
+LaunchBar Action Script for changing Wechat
+Pay Red Envelope csv to MoneyWiz style.
+"""
 import sys
 import os
 import pandas as pd
@@ -19,7 +22,7 @@ for index, arg in enumerate(sys.argv[1:]):
                                parse_dates=[0],
                                infer_datetime_format=True,
                                na_values='/')
-    # cash_flow_df = cash_flow_df.convert_dtypes()
+    cash_flow_df = cash_flow_df.convert_dtypes()
 
     # %%
     cash_flow_df = cash_flow_df.rename(
@@ -48,14 +51,15 @@ for index, arg in enumerate(sys.argv[1:]):
 
     # %%
     # select red evenlope
-    red_envelope: pd.DataFrame = cash_flow_df.loc[cash_flow_df.TradeType ==
-                                                  '微信红包'].copy(False)
+    red_envelope: pd.DataFrame = cash_flow_df.loc[
+        cash_flow_df.TradeType.str.contains('微信红包')].copy(False)
 
     # %%
     # add Accounts and Category.
     red_envelope.Description = red_envelope.TradeType
     red_envelope['Account'] = wechat_account_name
     red_envelope['Category'] = '其他 > 红包'
+    red_envelope['Payee'] = red_envelope['Payee'].str.replace('发(出|给)', '')
 
     # %%
     # set file name.
