@@ -37,7 +37,7 @@ for index, arg in enumerate(sys.argv[1:]):
 
     # %%
     # Change to the correct data type.
-    cash_flow_df['Date'] = cash_flow_df['Date'].dt.strftime('%d-%m-%Y')
+    cash_flow_df['Date'] = cash_flow_df['Date'].dt.strftime('%m-%d-%Y')
     cash_flow_df['Amount'] = cash_flow_df['Amount'].apply(
         lambda x: pd.to_numeric(x.replace('¥', '')))
     cash_flow_df['Direction'] = cash_flow_df['Direction'].astype('category')
