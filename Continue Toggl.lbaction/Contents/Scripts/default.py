@@ -1,5 +1,4 @@
-#!/usr/local/opt/python@3.10/libexec/bin/python
-#
+#!/usr/bin/env python
 # LaunchBar Action Script For Continue Toggl Track Last Entry.
 #
 
