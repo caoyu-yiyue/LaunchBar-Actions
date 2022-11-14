@@ -20,12 +20,24 @@ HEADERS = {
     'Authorization':
     'Basic %s' % b64encode(f"{TOKEN}:api_token".encode()).decode("ascii")
 }
+
+
+# Function for system notification.
+def sys_notification(title: str, message: str) -> None:
+    os.system("""
+    osascript -e 'display notification "{}" with title "{}"'
+    """.format(title, message))
+
+
 # %%
 # Get time entries' list.
-
-resp = requests.get('https://api.track.toggl.com/api/v9/me/time_entries',
-                    headers=HEADERS)
-my_entries = resp.json()
+try:
+    resp = requests.get('https://api.track.toggl.com/api/v9/me/time_entries',
+                        headers=HEADERS)
+    my_entries = resp.json()
+except URLError:
+    sys_notification(title='Continue Toggl Failed',
+                     message='Failed to connect Internet.')
 
 # %%
 # Get the last but not breaking entry.
@@ -82,6 +94,5 @@ else:
         notifi_content = 'Failed to connect Internet.'
 
 # %%
-os.system("""
-osascript -e 'display notification "{}" with title "{}"'
-""".format(notifi_title, notifi_content))
+# Notificate
+sys_notification(title=notifi_title, message=notifi_content)
