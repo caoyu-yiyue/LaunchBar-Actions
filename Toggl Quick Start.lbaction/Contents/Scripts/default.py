@@ -4,6 +4,7 @@
 #
 
 import os
+import sys
 from base64 import b64encode
 from datetime import datetime, timezone
 
@@ -29,12 +30,13 @@ def sys_notification(title: str, message: str) -> None:
     """.format(title, message))
 
 
+description = sys.argv[1] if len(sys.argv) > 1 else ''
 local_now = datetime.now().astimezone()
 utc_now = local_now.astimezone(tz=timezone.utc)
 post_data = {
     'billable': False,
     'created_with': 'LaunchBar Action',
-    'description': '',
+    'description': description,
     'project_id': None,
     'task_id': None,
     'tags_id': None,
@@ -47,8 +49,8 @@ post_data = {
 response = requests.post(API, json=post_data, headers=HEADERS)
 
 if response.status_code == 200:
-    notifi_title = 'Start A new Toggl Entry!'
-    notifi_content = '✅Quickly started an untitled Toggl time entry.'
+    notifi_title = description if description else 'Untitled'
+    notifi_content = '✅Quickly started an Toggl time entry.'
 else:
     notifi_title = 'Failed to Start Toggl Entry'
     notifi_content = 'Some error occured.'
